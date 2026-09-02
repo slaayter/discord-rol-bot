@@ -203,7 +203,7 @@ client.on('messageCreate', async (message) => {
       }
 
       if (target.roles.cache.has(role.id)) {
-        return sendAndDelete(`ℹ️ ${target.user.tag} ya tiene el rol ${role.name}.`);
+        return sendAndDelete(`ℹ️ ${target.user.tag} ya tiene el rol ${role}.`);
       }
 
       await target.roles.add(role);
@@ -251,7 +251,7 @@ client.on('messageCreate', async (message) => {
       }
 
       if (!target.roles.cache.has(role.id)) {
-        return sendAndDelete(`ℹ️ ${target.user.tag} no tiene el rol ${role.name}.`);
+        return sendAndDelete(`ℹ️ ${target.user.tag} no tiene el rol ${role}.`);
       }
 
       await target.roles.remove(role);
