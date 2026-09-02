@@ -91,6 +91,10 @@ client.on('messageCreate', async (message) => {
 
   // Roles que pueden usar los comandos (staff autorizado) - Nuevo server
   const STAFF_ROLES = [
+    '1543930391872802827', // Ceo
+    '1543930393525358702', // Director General
+    '1543930395572052029', // Soporte Ventas
+    '1543930396532678826', // Developer
     '1543930402077417513', // Alta Cupula
     '1543930404195672205', // Master
     '1543930405030334527', // Master Staff
