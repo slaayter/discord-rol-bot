@@ -100,7 +100,7 @@ client.on('messageCreate', async (message) => {
   const hasStaffRole = member.roles.cache.some((role) => STAFF_ROLES.includes(role.id));
 
   if (!hasStaffRole) {
-    return sendAndDelete('❌ No tienes permisos para usar comandos de roles (solo Resp, Sênior o Auxiliar).');
+    return sendAndDelete('❌ No tienes permisos.');
   }
 
   // Registrar log en el canal correspondiente como embed
