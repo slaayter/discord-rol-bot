@@ -263,10 +263,11 @@ async function handleAntiRaid(message) {
 
     // 3. Aviso de aislamiento en el canal de logs antiraid
     const embed = new EmbedBuilder()
-      .setTitle('🚨 Anti-raid activado')
+      .setTitle('Dont Type Activado')
       .setColor(0xed4245)
-      .setDescription(
-        `${target.user.tag} (${target.id}) ha sido aislado durante **2 horas** y se le han borrado sus mensajes de la **última hora**.`
+      .addFields(
+        { name: 'Usuario', value: `${target} (${target.id})`, inline: true },
+        { name: 'Mensaje', value: message.content || '(sin texto)', inline: false }
       )
       .setTimestamp();
 
