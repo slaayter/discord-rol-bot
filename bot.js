@@ -272,24 +272,35 @@ client.on('messageCreate', async (message) => {
 });
 
 // Función antiraid: aísla al usuario por 2h y borra sus mensajes de la última hora
+const activeIsolations = new Map(); // userId -> timestamp (evita logs duplicados)
+
 async function handleAntiRaid(message) {
   const target = message.member;
   if (!target) return;
+
+  const last = activeIsolations.get(target.id);
+  if (last && Date.now() - last < 60 * 1000) return; // ya se procesó hace poco
+  activeIsolations.set(target.id, Date.now());
 
   try {
     // 1. Borrar el mensaje disparador al instante
     message.delete().catch(() => {});
 
-    // 2. Aislar (silencio) por 2 horas
-    await target.timeout(ANTIRAID_TIMEOUT, 'Cuenta comprometida / anti-raid');
+    // 2. Aislar (silencio) por 2 horas (si no se puede, igual se registra la log)
+    let isolated = true;
+    try {
+      await target.timeout(ANTIRAID_TIMEOUT, 'Cuenta comprometida / anti-raid');
+    } catch {
+      isolated = false;
+    }
 
     // 3. Log de aislamiento inmediato en el canal de logs antiraid
     const embed = new EmbedBuilder()
       .setTitle('Usuario aislado (Don\'t Type)')
       .setColor(0xed4245)
       .setDescription(
-        `${target} ha sido aislado 2 hora(s) por escribir en el canal ${message.channel}.\n\n` +
-          `Motivo: Posible cuenta de spam.\nMensajes borrados: Sí`
+        `${target} ha sido ${isolated ? 'aislado 2 hora(s)' : 'marcado'} por escribir en el canal ${message.channel}.\n\n` +
+          `Motivo: Posible cuenta de spam.\nMensajes borrados: ${isolated ? 'Sí' : 'No'}`
       )
       .addFields(
         { name: 'Usuario', value: `${target} (${target.id})`, inline: false },
@@ -302,14 +313,16 @@ async function handleAntiRaid(message) {
     const logChannel = message.guild.channels.cache.get(ANTIRAID_LOG_CHANNEL);
     if (logChannel) logChannel.send({ embeds: [embed] }).catch(() => {});
 
-    console.log(`🚨 Anti-raid: ${target.user.tag} aislado 2h por mensaje en canal antiraid`);
+    console.log(`🚨 Anti-raid: ${target.user.tag} ${isolated ? 'aislado 2h' : 'no aislado'} por mensaje en canal antiraid`);
 
     // 4. Borrar los mensajes del usuario de la última hora en segundo plano (sin bloquear la log)
     setTimeout(() => {
       purgeRecentMessages(target, message.guild);
+      activeIsolations.delete(target.id);
     }, 0);
   } catch (error) {
     console.error('Error en anti-raid:', error);
+    activeIsolations.delete(target.id);
   }
 }
 
