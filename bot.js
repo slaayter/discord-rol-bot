@@ -82,11 +82,6 @@ client.on('messageCreate', async (message) => {
 
   // Verificar que el miembro tenga uno de los roles de staff autorizados
   const member = message.member;
-  const hasStaffRole = member.roles.cache.some((role) => STAFF_ROLES.includes(role.id));
-
-  if (!hasStaffRole) {
-    return message.reply('❌ No tienes permisos para usar comandos de roles (solo Resp, Sênior o Auxiliar).');
-  }
 
   // Borrar el mensaje del comando al instante
   try {
@@ -100,6 +95,12 @@ client.on('messageCreate', async (message) => {
     const msg = await message.channel.send(text);
     setTimeout(() => msg.delete().catch(() => {}), deleteAfter);
     return msg;
+  }
+
+  const hasStaffRole = member.roles.cache.some((role) => STAFF_ROLES.includes(role.id));
+
+  if (!hasStaffRole) {
+    return sendAndDelete('❌ No tienes permisos para usar comandos de roles (solo Resp, Sênior o Auxiliar).');
   }
 
   // Registrar log en el canal correspondiente como embed
