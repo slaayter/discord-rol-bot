@@ -380,7 +380,8 @@ async function purgeRecentMessages(target, guild) {
       let messages;
       try {
         messages = await channel.messages.fetch({ limit: 100 });
-      } catch {
+      } catch (e) {
+        console.log(`[purge] NO SE PUDO LEER ${channel.id} (${channel.name}): ${e.message}`);
         continue;
       }
       const targets = messages.filter(
@@ -390,13 +391,14 @@ async function purgeRecentMessages(target, guild) {
         const ids = [...targets.keys()];
         try {
           await channel.bulkDelete(ids, true);
-        } catch {
+        } catch (e) {
+          console.log(`[purge] ${channel.id} bulk fallo: ${e.message}`);
           // Si bulkDelete falla (mensajes >14 días u otro motivo), borrar uno a uno
           for (const m of targets.values()) {
             try {
               await m.delete();
-            } catch {
-              // no se pudo borrar este mensaje, continuar
+            } catch (e2) {
+              console.log(`[purge] ${channel.id} delete unitario fallo: ${e2.message}`);
             }
           }
         }
