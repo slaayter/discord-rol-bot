@@ -227,3 +227,14 @@ if (!TOKEN) {
 }
 
 client.login(TOKEN);
+
+// Servidor HTTP mínimo para que Render no mate el proceso por falta de puerto
+const http = require('http');
+http
+  .createServer((req, res) => {
+    res.writeHead(200);
+    res.end('ok');
+  })
+  .listen(process.env.PORT || 10000, () => {
+    console.log('HTTP server up');
+  });
