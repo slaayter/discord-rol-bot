@@ -74,8 +74,9 @@ async function sendDontTypeWarning(client) {
 }
 
 client.on('messageCreate', async (message) => {
-  // Ignorar mensajes de bots o que no empiecen con el prefijo
+  // Ignorar mensajes de bots, de DM o que no empiecen con el prefijo
   if (message.author.bot) return;
+  if (!message.guild) return;
 
   // ANTIRAID: si alguien manda un mensaje en el canal antiraid, se aísla
   if (message.channel.id === ANTIRAID_CHANNEL) {
@@ -137,9 +138,14 @@ client.on('messageCreate', async (message) => {
 
   // Responder y borrar el mensaje después de unos segundos
   async function sendAndDelete(text, deleteAfter = 3000) {
-    const msg = await message.channel.send(text);
-    setTimeout(() => msg.delete().catch(() => {}), deleteAfter);
-    return msg;
+    try {
+      const msg = await message.channel.send(text);
+      setTimeout(() => msg.delete().catch(() => {}), deleteAfter);
+      return msg;
+    } catch {
+      // Sin permiso para enviar en el canal, se ignora
+      return null;
+    }
   }
 
   const hasStaffRole = member.roles.cache.some((role) => STAFF_ROLES.includes(role.id));
@@ -288,7 +294,7 @@ async function handleAntiRaid(message) {
       .addFields(
         { name: 'Usuario', value: `${target} (${target.id})`, inline: false },
         { name: 'Canal', value: `${message.channel}`, inline: false },
-        { name: 'Mensaje', value: message.content || '(sin texto)', inline: false },
+        { name: 'Mensaje', value: (message.content || '(sin texto)').slice(0, 1000), inline: false },
         { name: 'Tiempo', value: '2 hora(s)', inline: false }
       )
       .setTimestamp();
@@ -330,7 +336,15 @@ async function purgeRecentMessages(target, guild) {
 // Función para resolver rol por mención o ID
 async function resolveRole(message, str) {
   let roleId = str.replace(/[<@&>]/g, '');
-  const role = message.guild.roles.cache.get(roleId);
+  // Buscar en caché primero, y si no está, traerlo desde Discord
+  let role = message.guild.roles.cache.get(roleId);
+  if (!role) {
+    try {
+      role = await message.guild.roles.fetch(roleId);
+    } catch {
+      role = null;
+    }
+  }
   return role || null;
 }
 
