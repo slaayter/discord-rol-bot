@@ -385,11 +385,20 @@ async function purgeRecentMessages(target, guild) {
       );
       console.log(`[purge] canal ${channel?.name}: ${targets.size} mensajes de ${target.user.tag}`);
       if (targets.size > 0) {
+        const ids = [...targets.keys()];
         try {
-          await channel.bulkDelete(targets, true);
+          await channel.bulkDelete(ids, true);
           console.log(`[purge] -> borrados ${targets.size} en ${channel?.name}`);
         } catch (e) {
-          console.log(`[purge] DELETE error en ${channel?.name}: ${e.message} (mensajes: ${targets.size})`);
+          // Si bulkDelete falla (mensajes >14 días u otro motivo), borrar uno a uno
+          console.log(`[purge] bulkDelete fallo en ${channel?.name}: ${e.message}, borrando uno a uno`);
+          for (const m of targets.values()) {
+            try {
+              await m.delete();
+            } catch {
+              // no se pudo borrar este mensaje, continuar
+            }
+          }
         }
       }
     } catch (e) {
