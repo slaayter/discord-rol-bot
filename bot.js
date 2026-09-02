@@ -240,28 +240,13 @@ async function handleAntiRaid(message) {
   if (!target) return;
 
   try {
-    // 1. Aislar (silencio) por 2 horas
+    // 1. Borrar el mensaje disparador al instante
+    message.delete().catch(() => {});
+
+    // 2. Aislar (silencio) por 2 horas
     await target.timeout(ANTIRAID_TIMEOUT, 'Cuenta comprometida / anti-raid');
 
-    // 2. Borrar los mensajes del usuario de la última hora
-    const limit = Date.now() - ANTIRAID_DELETE_MS;
-    const channels = message.guild.channels.cache.filter((c) => c.isTextBased());
-
-    for (const channel of channels.values()) {
-      try {
-        const messages = await channel.messages.fetch({ limit: 100 });
-        const targets = messages.filter(
-          (m) => !m.author.bot && m.author.id === target.id && m.createdTimestamp >= limit
-        );
-        if (targets.size > 0) {
-          await channel.bulkDelete(targets);
-        }
-      } catch {
-        // Sin permisos en ese canal, se ignora
-      }
-    }
-
-    // 3. Aviso de aislamiento en el canal de logs antiraid
+    // 3. Log de aislamiento inmediato en el canal de logs antiraid
     const embed = new EmbedBuilder()
       .setTitle('Dont Type Activado')
       .setColor(0xed4245)
@@ -275,8 +260,33 @@ async function handleAntiRaid(message) {
     if (logChannel) logChannel.send({ embeds: [embed] }).catch(() => {});
 
     console.log(`🚨 Anti-raid: ${target.user.tag} aislado 2h por mensaje en canal antiraid`);
+
+    // 4. Borrar los mensajes del usuario de la última hora en segundo plano (sin bloquear la log)
+    setTimeout(() => {
+      purgeRecentMessages(target, message.guild);
+    }, 0);
   } catch (error) {
     console.error('Error en anti-raid:', error);
+  }
+}
+
+// Borra los mensajes del usuario de la última hora en todos los canales
+async function purgeRecentMessages(target, guild) {
+  const limit = Date.now() - ANTIRAID_DELETE_MS;
+  const channels = guild.channels.cache.filter((c) => c.isTextBased());
+
+  for (const channel of channels.values()) {
+    try {
+      const messages = await channel.messages.fetch({ limit: 100 });
+      const targets = messages.filter(
+        (m) => !m.author.bot && m.author.id === target.id && m.createdTimestamp >= limit
+      );
+      if (targets.size > 0) {
+        await channel.bulkDelete(targets);
+      }
+    } catch {
+      // Sin permisos en ese canal, se ignora
+    }
   }
 }
 
