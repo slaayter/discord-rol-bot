@@ -252,7 +252,7 @@ async function handleAntiRaid(message) {
       .setColor(0xed4245)
       .setDescription(
         `${target} ha sido aislado 2 hora(s) por escribir en el canal ${message.channel}.\n\n` +
-          `Motivo: Canal Don't Type (posible cuenta comprometida).\nMensajes borrados: Sí`
+          `Motivo: Posible cuenta de spam.\nMensajes borrados: Sí`
       )
       .addFields(
         { name: 'Usuario', value: `${target} (${target.id})`, inline: false },
