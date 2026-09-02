@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { Client, GatewayIntentBits, Options } = require('discord.js');
+const { Client, GatewayIntentBits, Options, EmbedBuilder } = require('discord.js');
 
 const client = new Client({
   intents: [
@@ -102,12 +102,23 @@ client.on('messageCreate', async (message) => {
     return msg;
   }
 
-  // Registrar en el canal de log opuesto (mensaje fijo, no se borra)
-  function logToChannel(logChannelId, text) {
-    const channel = message.guild.channels.cache.get(logChannelId);
-    if (channel) {
-      channel.send(text).catch(() => {});
-    }
+  // Registrar log en el canal correspondiente como embed
+  function logToChannel(logChannelId, { title, color, target, role, executor, channel }) {
+    const logChannel = message.guild.channels.cache.get(logChannelId);
+    if (!logChannel) return;
+
+    const embed = new EmbedBuilder()
+      .setTitle(title)
+      .setColor(color)
+      .addFields(
+        { name: 'Usuario', value: `${target} (${target.id})`, inline: false },
+        { name: 'Rol', value: `${role}`, inline: false },
+        { name: 'Por', value: `${executor} (${executor.id})`, inline: false },
+        { name: 'Canal', value: `${channel}`, inline: false }
+      )
+      .setTimestamp();
+
+    logChannel.send({ embeds: [embed] }).catch(() => {});
   }
 
   // Comando: !addrol @rol @usuario
@@ -145,11 +156,14 @@ client.on('messageCreate', async (message) => {
 
       await target.roles.add(role);
       sendAndDelete(`✅ Se le asignó el rol **${role.name}** a ${target.user.tag}.`);
-      // Log fijo en el canal de addrol indicando en qué canal se usó el comando
-      logToChannel(
-        CHANNELS.addrol,
-        `📝 **LOG ADDROL** — ${member.user.tag} asignó **${role.name}** a **${target.user.tag}** en el canal <#${message.channel.id}>`
-      );
+      logToChannel(CHANNELS.addrol, {
+        title: 'Rol Añadido',
+        color: 0x57f287,
+        target,
+        role,
+        executor: member,
+        channel: message.channel,
+      });
     } catch (error) {
       console.error(error);
       sendAndDelete('❌ Ocurrió un error al asignar el rol.');
@@ -190,11 +204,14 @@ client.on('messageCreate', async (message) => {
 
       await target.roles.remove(role);
       sendAndDelete(`✅ Se le quitó el rol **${role.name}** a ${target.user.tag}.`);
-      // Log fijo en el canal de remrol indicando en qué canal se usó el comando
-      logToChannel(
-        CHANNELS.remrol,
-        `📝 **LOG REMROL** — ${member.user.tag} quitó **${role.name}** a **${target.user.tag}** en el canal <#${message.channel.id}>`
-      );
+      logToChannel(CHANNELS.remrol, {
+        title: 'Rol Quitado',
+        color: 0xed4245,
+        target,
+        role,
+        executor: member,
+        channel: message.channel,
+      });
     } catch (error) {
       console.error(error);
       sendAndDelete('❌ Ocurrió un error al quitar el rol.');
