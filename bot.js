@@ -248,11 +248,16 @@ async function handleAntiRaid(message) {
 
     // 3. Log de aislamiento inmediato en el canal de logs antiraid
     const embed = new EmbedBuilder()
-      .setTitle('Dont Type Activado')
+      .setTitle('Usuario aislado (Don\'t Type)')
       .setColor(0xed4245)
+      .setDescription(
+        `${target} ha sido aislado 2 hora(s) por escribir en el canal ${message.channel}.\n\n` +
+          `Motivo: Canal Don't Type (posible cuenta comprometida).\nMensajes borrados: Sí`
+      )
       .addFields(
-        { name: 'Usuario', value: `${target} (${target.id})`, inline: true },
-        { name: 'Mensaje', value: message.content || '(sin texto)', inline: false }
+        { name: 'Usuario', value: `${target} (${target.id})`, inline: false },
+        { name: 'Canal', value: `${message.channel}`, inline: false },
+        { name: 'Tiempo', value: '2 hora(s)', inline: false }
       )
       .setTimestamp();
 
