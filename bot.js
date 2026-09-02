@@ -31,8 +31,8 @@ const PREFIX = '!';
 
 // Canales específicos por comando (y su canal de log opuesto)
 const CHANNELS = {
-  addcargo: '1543688837203501239', // canal de addcargo
-  remcargo: '1543688920569479238', // canal de remcargo
+  addrol: '1544532897455808643', // canal de addrol
+  remrol: '1544532940711526530', // canal de remrol
 };
 
 client.once('ready', () => {
@@ -48,39 +48,36 @@ client.on('messageCreate', async (message) => {
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const command = args.shift().toLowerCase();
 
-  // Roles que pueden usar los comandos (staff autorizado)
+  // Roles que pueden usar los comandos (staff autorizado) - Nuevo server
   const STAFF_ROLES = [
-    // Roles de staff principales
-    '1540867366911483996', // Resp
-    '1540867367716921444', // Sênior
-    '1540867368442400818', // Auxiliar
-    // Roles adicionales de staff
-    '1540867365968023632',
-    '1540867365179359283',
-    '1540867364479049808',
-    '1540867363682123856',
-    '1540867362973294612',
-    '1540867361924710531',
-    '1540867361475924028',
-    '1540867360074899616',
-    '1540867359340765335',
-    '1540867358586052708',
-    '1540867357851783168',
-    '1540867357138751579',
-    '1540867353695223969',
-    '1540867352768413726',
-    '1540867352021958686',
-    '1540867351203815506',
-    '1540867350310682654',
-    '1540867333340528710',
-    '1540867332593819758',
-    '1540867331922853908',
-    '1540867331226468536',
-    '1540867328332537967',
-    '1540867327967494224',
-    '1540867325878730893',
-    '1540867324997799956',
-    '1540867324276645969',
+    '1543930402077417513', // Alta Cupula
+    '1543930404195672205', // Master
+    '1543930405030334527', // Master Staff
+    '1543930406209069127', // Master WallStreet
+    '1543930407110709269', // Master Orgs/LGL
+    '1543930407937122334', // Master TL
+    '1543930408796684318', // Master AFL
+    '1543930415398526986', // Resp Conducta
+    '1543930416195436654', // Resp Administrativo
+    '1543930417000747030', // Resp Comunidad
+    '1543930418363895919', // Resp AFL
+    '1543930419391635597', // Resp AntiTrolls
+    '1543930420134027366', // Resp Llamados
+    '1543930420876415048', // Resp WallStreet
+    '1543930421727993856', // Resp ORGs
+    '1543930422512320623', // Resp Legal
+    '1543930423338336356', // Resp RH
+    '1543930424974377010', // Resp Interaccion
+    '1543930425838145606', // Resp TL
+    '1543930427348090911', // Tier 5
+    '1543930428774285353', // Tier 4
+    '1543930429583663115', // Tier 3
+    '1543930430850601092', // Tier 2
+    '1543930431710302208', // Tier 1
+    '1543930432519807008', // Tier 0
+    '1543930434994438206', // Resp
+    '1543930438211604630', // ADM
+    '1543930439054393475', // Auxiliar
   ];
 
   // Verificar que el miembro tenga uno de los roles de staff autorizados
@@ -113,11 +110,11 @@ client.on('messageCreate', async (message) => {
     }
   }
 
-  // Comando: !addcargo @rol @usuario
-  if (command === 'addcargo') {
+  // Comando: !addrol @rol @usuario
+  if (command === 'addrol') {
     if (args.length < 2) {
       return sendAndDelete(
-        '❌ Uso correcto: `!addcargo <@rol o ID de rol> <@usuario o ID de usuario>`'
+        '❌ Uso correcto: `!addrol <@rol o ID de rol> <@usuario o ID de usuario>`'
       );
     }
 
@@ -148,10 +145,10 @@ client.on('messageCreate', async (message) => {
 
       await target.roles.add(role);
       sendAndDelete(`✅ Se le asignó el rol **${role.name}** a ${target.user.tag}.`);
-      // Log fijo en el canal de addcargo indicando en qué canal se usó el comando
+      // Log fijo en el canal de addrol indicando en qué canal se usó el comando
       logToChannel(
-        CHANNELS.addcargo,
-        `📝 **LOG ADDCARGO** — ${member.user.tag} asignó **${role.name}** a **${target.user.tag}** en el canal <#${message.channel.id}>`
+        CHANNELS.addrol,
+        `📝 **LOG ADDROL** — ${member.user.tag} asignó **${role.name}** a **${target.user.tag}** en el canal <#${message.channel.id}>`
       );
     } catch (error) {
       console.error(error);
@@ -159,11 +156,11 @@ client.on('messageCreate', async (message) => {
     }
   }
 
-  // Comando: !remcargo @rol @usuario
-  if (command === 'remcargo') {
+  // Comando: !remrol @rol @usuario
+  if (command === 'remrol') {
     if (args.length < 2) {
       return sendAndDelete(
-        '❌ Uso correcto: `!remcargo <@rol o ID de rol> <@usuario o ID de usuario>`'
+        '❌ Uso correcto: `!remrol <@rol o ID de rol> <@usuario o ID de usuario>`'
       );
     }
 
@@ -193,10 +190,10 @@ client.on('messageCreate', async (message) => {
 
       await target.roles.remove(role);
       sendAndDelete(`✅ Se le quitó el rol **${role.name}** a ${target.user.tag}.`);
-      // Log fijo en el canal de remcargo indicando en qué canal se usó el comando
+      // Log fijo en el canal de remrol indicando en qué canal se usó el comando
       logToChannel(
-        CHANNELS.remcargo,
-        `📝 **LOG REMCARGO** — ${member.user.tag} quitó **${role.name}** a **${target.user.tag}** en el canal <#${message.channel.id}>`
+        CHANNELS.remrol,
+        `📝 **LOG REMROL** — ${member.user.tag} quitó **${role.name}** a **${target.user.tag}** en el canal <#${message.channel.id}>`
       );
     } catch (error) {
       console.error(error);
