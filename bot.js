@@ -192,13 +192,20 @@ client.on('messageCreate', async (message) => {
     }
 
     try {
+      // Obtener el rol más alto del bot (buscándolo si hace falta)
+      let botMember = message.guild.members.me;
+      if (!botMember) {
+        botMember = await message.guild.members.fetchMe().catch(() => null);
+      }
+      const botHighest = botMember?.roles.highest?.position ?? 0;
+
       // Verificar que el rol no esté gestionado por una integración (Nitro, otro bot, etc.)
       if (role.managed) {
         return sendAndDelete('❌ No se puede asignar este rol porque está gestionado por una integración externa.');
       }
 
       // Verificar que el bot pueda gestionar ese rol (posición del rol del bot)
-      if (role.position >= message.guild.members.me.roles.highest.position) {
+      if (role.position >= botHighest) {
         return sendAndDelete('❌ El bot no tiene permisos para asignar ese rol (el rol está por encima del bot).');
       }
 
@@ -249,11 +256,18 @@ client.on('messageCreate', async (message) => {
     }
 
     try {
+      // Obtener el rol más alto del bot (buscándolo si hace falta)
+      let botMember = message.guild.members.me;
+      if (!botMember) {
+        botMember = await message.guild.members.fetchMe().catch(() => null);
+      }
+      const botHighest = botMember?.roles.highest?.position ?? 0;
+
       if (role.managed) {
         return sendAndDelete('❌ No se puede quitar este rol porque está gestionado por una integración externa.');
       }
 
-      if (role.position >= message.guild.members.me.roles.highest.position) {
+      if (role.position >= botHighest) {
         return sendAndDelete('❌ El bot no tiene permisos para quitar ese rol (el rol está por encima del bot).');
       }
 
