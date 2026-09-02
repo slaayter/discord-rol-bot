@@ -112,10 +112,10 @@ client.on('messageCreate', async (message) => {
       .setTitle(title)
       .setColor(color)
       .addFields(
-        { name: 'Usuario', value: `${target} (${target.id})`, inline: false },
-        { name: 'Rol', value: `${role}`, inline: false },
-        { name: 'Por', value: `${executor} (${executor.id})`, inline: false },
-        { name: 'Canal', value: `${channel}`, inline: false }
+        { name: 'Usuario', value: `${target} (${target.id})`, inline: true },
+        { name: 'Rol', value: `${role}`, inline: true },
+        { name: 'Por', value: `${executor} (${executor.id})`, inline: true },
+        { name: 'Canal', value: `${channel}`, inline: true }
       )
       .setTimestamp();
 
