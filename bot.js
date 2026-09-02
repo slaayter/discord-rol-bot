@@ -377,11 +377,13 @@ async function purgeRecentMessages(target, guild) {
       const targets = messages.filter(
         (m) => !m.author.bot && m.author.id === target.id && m.createdTimestamp >= limit
       );
+      console.log(`[purge] canal ${channel.name}: ${targets.size} mensajes de ${target.user.tag}`);
       if (targets.size > 0) {
         await channel.bulkDelete(targets);
+        console.log(`[purge] -> borrados ${targets.size} en ${channel.name}`);
       }
-    } catch {
-      // Sin permisos en ese canal, se ignora
+    } catch (e) {
+      console.log(`[purge] error en ${channel?.name}: ${e.message}`);
     }
   }
 }
