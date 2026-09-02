@@ -192,6 +192,11 @@ client.on('messageCreate', async (message) => {
     }
 
     try {
+      // Verificar que el rol no esté gestionado por una integración (Nitro, otro bot, etc.)
+      if (role.managed) {
+        return sendAndDelete('❌ No se puede asignar este rol porque está gestionado por una integración externa.');
+      }
+
       // Verificar que el bot pueda gestionar ese rol (posición del rol del bot)
       if (role.position >= message.guild.members.me.roles.highest.position) {
         return sendAndDelete('❌ El bot no tiene permisos para asignar ese rol (el rol está por encima del bot).');
@@ -200,6 +205,11 @@ client.on('messageCreate', async (message) => {
       // Verificar que el staff solo pueda gestionar roles por debajo de su rol más alto
       if (role.position >= member.roles.highest.position) {
         return sendAndDelete('❌ No puedes gestionar ese rol porque está igual o por encima de tu rol más alto.');
+      }
+
+      // Verificar que el usuario destino no tenga un rol por encima del bot
+      if (target.roles.highest.position >= message.guild.members.me.roles.highest.position) {
+        return sendAndDelete('❌ No puedes gestionar a este usuario porque tiene un rol por encima del bot.');
       }
 
       if (target.roles.cache.has(role.id)) {
@@ -244,6 +254,10 @@ client.on('messageCreate', async (message) => {
     }
 
     try {
+      if (role.managed) {
+        return sendAndDelete('❌ No se puede quitar este rol porque está gestionado por una integración externa.');
+      }
+
       if (role.position >= message.guild.members.me.roles.highest.position) {
         return sendAndDelete('❌ El bot no tiene permisos para quitar ese rol (el rol está por encima del bot).');
       }
@@ -251,6 +265,11 @@ client.on('messageCreate', async (message) => {
       // Verificar que el staff solo pueda gestionar roles por debajo de su rol más alto
       if (role.position >= member.roles.highest.position) {
         return sendAndDelete('❌ No puedes gestionar ese rol porque está igual o por encima de tu rol más alto.');
+      }
+
+      // Verificar que el usuario destino no tenga un rol por encima del bot
+      if (target.roles.highest.position >= message.guild.members.me.roles.highest.position) {
+        return sendAndDelete('❌ No puedes gestionar a este usuario porque tiene un rol por encima del bot.');
       }
 
       if (!target.roles.cache.has(role.id)) {
