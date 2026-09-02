@@ -207,7 +207,7 @@ client.on('messageCreate', async (message) => {
       }
 
       await target.roles.add(role);
-      sendAndDelete(`✅ Se le asignó el rol **${role.name}** a ${target.user.tag}.`);
+      sendAndDelete(`✅ Se le asignó el rol ${role} a ${target.user.tag}.`);
       logToChannel(CHANNELS.addrol, {
         title: 'Rol Añadido',
         color: 0x57f287,
@@ -255,7 +255,7 @@ client.on('messageCreate', async (message) => {
       }
 
       await target.roles.remove(role);
-      sendAndDelete(`✅ Se le quitó el rol **${role.name}** a ${target.user.tag}.`);
+      sendAndDelete(`✅ Se le quitó el rol ${role} a ${target.user.tag}.`);
       logToChannel(CHANNELS.remrol, {
         title: 'Rol Quitado',
         color: 0xed4245,
