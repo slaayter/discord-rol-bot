@@ -284,6 +284,7 @@ async function handleAntiRaid(message) {
       .addFields(
         { name: 'Usuario', value: `${target} (${target.id})`, inline: false },
         { name: 'Canal', value: `${message.channel}`, inline: false },
+        { name: 'Mensaje', value: message.content || '(sin texto)', inline: false },
         { name: 'Tiempo', value: '2 hora(s)', inline: false }
       )
       .setTimestamp();
