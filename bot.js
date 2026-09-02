@@ -297,7 +297,7 @@ client.on('messageCreate', async (message) => {
       console.error(error);
       const msg = error.code === 50013
         ? '❌ El bot no tiene permisos para quitar ese rol. Asegúrate de que el rol del bot esté por encima del rol que intentas quitar en la jerarquía de Discord.'
-        : `❌ Ocurrió un error al quitar el rol. (${error.message || error})`;
+        : `❌ Ocurrió un error al quitar el rol. (${error.name}: ${error.message})`;
       sendAndDelete(msg);
     }
   }
