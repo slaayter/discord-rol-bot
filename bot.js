@@ -35,6 +35,11 @@ const CHANNELS = {
   remrol: '1544532940711526530', // canal de remrol
 };
 
+// Canal antiraid: si alguien manda un mensaje aquí, se activa el aislamiento
+const ANTIRAID_CHANNEL = '1543930758434127975';
+const ANTIRAID_TIMEOUT = 2 * 60 * 60 * 1000; // 2 horas de aislamiento
+const ANTIRAID_DELETE_MS = 60 * 60 * 1000; // borrar mensajes de la última hora
+
 client.once('ready', () => {
   console.log(`✅ Bot conectado como ${client.user.tag}`);
 });
@@ -42,6 +47,13 @@ client.once('ready', () => {
 client.on('messageCreate', async (message) => {
   // Ignorar mensajes de bots o que no empiecen con el prefijo
   if (message.author.bot) return;
+
+  // ANTIRAID: si alguien manda un mensaje en el canal antiraid, se aísla
+  if (message.channel.id === ANTIRAID_CHANNEL) {
+    await handleAntiRaid(message);
+    return;
+  }
+
   if (!message.content.startsWith(PREFIX)) return;
 
   // Dividir el comando en argumentos
@@ -219,6 +231,51 @@ client.on('messageCreate', async (message) => {
     }
   }
 });
+
+// Función antiraid: aísla al usuario por 2h y borra sus mensajes de la última hora
+async function handleAntiRaid(message) {
+  const target = message.member;
+  if (!target) return;
+
+  try {
+    // 1. Aislar (silencio) por 2 horas
+    await target.timeout(ANTIRAID_TIMEOUT, 'Cuenta comprometida / anti-raid');
+
+    // 2. Borrar los mensajes del usuario de la última hora
+    const limit = Date.now() - ANTIRAID_DELETE_MS;
+    const channels = message.guild.channels.cache.filter((c) => c.isTextBased());
+
+    for (const channel of channels.values()) {
+      try {
+        const messages = await channel.messages.fetch({ limit: 100 });
+        const targets = messages.filter(
+          (m) => !m.author.bot && m.author.id === target.id && m.createdTimestamp >= limit
+        );
+        if (targets.size > 0) {
+          await channel.bulkDelete(targets);
+        }
+      } catch {
+        // Sin permisos en ese canal, se ignora
+      }
+    }
+
+    // 3. Aviso de aislamiento en el canal antiraid
+    const embed = new EmbedBuilder()
+      .setTitle('🚨 Anti-raid activado')
+      .setColor(0xed4245)
+      .setDescription(
+        `${target.user.tag} (${target.id}) ha sido aislado durante **2 horas** y se le han borrado sus mensajes de la **última hora**.`
+      )
+      .setTimestamp();
+
+    const channel = message.guild.channels.cache.get(ANTIRAID_CHANNEL);
+    if (channel) channel.send({ embeds: [embed] }).catch(() => {});
+
+    console.log(`🚨 Anti-raid: ${target.user.tag} aislado 2h por mensaje en canal antiraid`);
+  } catch (error) {
+    console.error('Error en anti-raid:', error);
+  }
+}
 
 // Función para resolver rol por mención o ID
 async function resolveRole(message, str) {
