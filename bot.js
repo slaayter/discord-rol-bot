@@ -203,12 +203,13 @@ client.on('messageCreate', async (message) => {
       }
 
       // Verificar que el staff solo pueda gestionar roles por debajo de su rol más alto
-      if (role.position >= member.roles.highest.position) {
+      if ((member.roles.highest?.position ?? 0) >= role.position) {
         return sendAndDelete('❌ No puedes gestionar ese rol porque está igual o por encima de tu rol más alto.');
       }
 
       // Verificar que el usuario destino no tenga un rol por encima del bot
-      if (target.roles.highest.position >= message.guild.members.me.roles.highest.position) {
+      const botHighest = message.guild.members.me.roles.highest?.position ?? 0;
+      if ((target.roles.highest?.position ?? 0) >= botHighest) {
         return sendAndDelete('❌ No puedes gestionar a este usuario porque tiene un rol por encima del bot.');
       }
 
@@ -263,12 +264,13 @@ client.on('messageCreate', async (message) => {
       }
 
       // Verificar que el staff solo pueda gestionar roles por debajo de su rol más alto
-      if (role.position >= member.roles.highest.position) {
+      if ((member.roles.highest?.position ?? 0) >= role.position) {
         return sendAndDelete('❌ No puedes gestionar ese rol porque está igual o por encima de tu rol más alto.');
       }
 
       // Verificar que el usuario destino no tenga un rol por encima del bot
-      if (target.roles.highest.position >= message.guild.members.me.roles.highest.position) {
+      const botHighestRem = message.guild.members.me.roles.highest?.position ?? 0;
+      if ((target.roles.highest?.position ?? 0) >= botHighestRem) {
         return sendAndDelete('❌ No puedes gestionar a este usuario porque tiene un rol por encima del bot.');
       }
 
