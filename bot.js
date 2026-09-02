@@ -44,7 +44,39 @@ const ANTIRAID_LOG_CHANNEL = '1544553248026009620';
 
 client.once('ready', () => {
   console.log(`✅ Bot conectado como ${client.user.tag}`);
+  sendDontTypeWarning(client);
 });
+
+// Envía el aviso de advertencia en el canal antiraid (solo si aún no existe)
+async function sendDontTypeWarning(client) {
+  const channel = client.channels.cache.get(ANTIRAID_CHANNEL);
+  if (!channel) return;
+
+  try {
+    const existing = await channel.messages.fetch({ limit: 5 });
+    const already = existing.some((m) => m.author.id === client.user.id && m.embeds[0]?.title?.includes('NO ESCRIBAS EN ESTE CANAL'));
+    if (already) return;
+  } catch {
+    // si no puede leer el historial, se ignora
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle('⚠️  NO ESCRIBAS EN ESTE CANAL  ⚠️')
+    .setColor(0xed4245)
+    .setDescription(
+      `- Si escribes en este canal, **serás AISLADO durante 2 HORAS** y se te **borrarán los últimos mensajes.**`
+    )
+    .addFields({
+      name: '⚠️  NO ESCRIBAS EN ESTE CANAL  ⚠️',
+      value:
+        'Este canal está reservado para cuentas AntiSpam. Si has sido hackeado, contacta con el staff.',
+      inline: false,
+    })
+    .setFooter({ text: 'Canal de control Anti Spam' })
+    .setTimestamp();
+
+  channel.send({ embeds: [embed] }).catch(() => {});
+}
 
 client.on('messageCreate', async (message) => {
   // Ignorar mensajes de bots o que no empiecen con el prefijo
