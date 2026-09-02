@@ -375,23 +375,19 @@ async function purgeRecentMessages(target, guild) {
     try {
       let messages;
       try {
-        messages = await channel.messages.fetch({ limit: 200 });
-      } catch (e) {
-        console.log(`[purge] FETCH error en ${channel?.name}: ${e.message}`);
+        messages = await channel.messages.fetch({ limit: 100 });
+      } catch {
         continue;
       }
       const targets = messages.filter(
         (m) => !m.author.bot && m.author.id === target.id && m.createdTimestamp >= limit
       );
-      console.log(`[purge] canal ${channel?.name}: ${targets.size} mensajes de ${target.user.tag}`);
       if (targets.size > 0) {
         const ids = [...targets.keys()];
         try {
           await channel.bulkDelete(ids, true);
-          console.log(`[purge] -> borrados ${targets.size} en ${channel?.name}`);
-        } catch (e) {
+        } catch {
           // Si bulkDelete falla (mensajes >14 días u otro motivo), borrar uno a uno
-          console.log(`[purge] bulkDelete fallo en ${channel?.name}: ${e.message}, borrando uno a uno`);
           for (const m of targets.values()) {
             try {
               await m.delete();
@@ -401,8 +397,8 @@ async function purgeRecentMessages(target, guild) {
           }
         }
       }
-    } catch (e) {
-      console.log(`[purge] error general en ${channel?.name}: ${e.message}`);
+    } catch {
+      // Sin permisos en ese canal, se ignora
     }
   }
 }
