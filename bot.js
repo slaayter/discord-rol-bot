@@ -213,7 +213,7 @@ client.on('messageCreate', async (message) => {
       }
 
       // Verificar que el staff solo pueda gestionar roles por debajo de su rol más alto
-      if ((member.roles.highest?.position ?? 0) >= role.position) {
+      if (role.position >= (member.roles.highest?.position ?? 0)) {
         return sendAndDelete('❌ No puedes gestionar ese rol porque está igual o por encima de tu rol más alto.');
       }
 
@@ -275,7 +275,7 @@ client.on('messageCreate', async (message) => {
       }
 
       // Verificar que el staff solo pueda gestionar roles por debajo de su rol más alto
-      if ((member.roles.highest?.position ?? 0) >= role.position) {
+      if (role.position >= (member.roles.highest?.position ?? 0)) {
         return sendAndDelete('❌ No puedes gestionar ese rol porque está igual o por encima de tu rol más alto.');
       }
 
