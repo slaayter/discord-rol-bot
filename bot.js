@@ -326,32 +326,32 @@ async function handleAntiRaid(message) {
       isolated = false;
     }
 
-    // 3. Log de aislamiento inmediato en el canal de logs antiraid
+    // 3. Borrar los mensajes del usuario de la última hora en todos los canales
+    const result = await purgeRecentMessages(target, message.guild);
+
+    // 4. Log de aislamiento en el canal de logs antiraid con los datos del purge
     const embed = new EmbedBuilder()
       .setTitle('Usuario aislado (Don\'t Type)')
       .setColor(0xed4245)
       .setDescription(
         `${target} ha sido ${isolated ? 'aislado 2 hora(s)' : 'marcado'} por escribir en el canal ${message.channel}.\n\n` +
-          `Motivo: Posible cuenta de spam.\nMensajes borrados: ${isolated ? 'Sí' : 'No'}`
+          `Motivo: Posible cuenta de spam.`
       )
       .addFields(
         { name: 'Usuario', value: `${target} (${target.id})`, inline: false },
         { name: 'Canal', value: `${message.channel}`, inline: false },
         { name: 'Mensaje', value: (message.content || '(sin texto)').slice(0, 1000), inline: false },
-        { name: 'Tiempo', value: '2 hora(s)', inline: false }
+        { name: 'Mensajes Borrados', value: `${result.mensajes}`, inline: true },
+        { name: 'Canales', value: `${result.canales}`, inline: true },
+        { name: 'Tiempo', value: '2 hora(s)', inline: true }
       )
       .setTimestamp();
 
     const logChannel = message.guild.channels.cache.get(ANTIRAID_LOG_CHANNEL);
     if (logChannel) logChannel.send({ embeds: [embed] }).catch(() => {});
 
-    console.log(`🚨 Anti-raid: ${target.user.tag} ${isolated ? 'aislado 2h' : 'no aislado'} por mensaje en canal antiraid`);
-
-    // 4. Borrar los mensajes del usuario de la última hora en segundo plano (sin bloquear la log)
-    setTimeout(() => {
-      purgeRecentMessages(target, message.guild);
-      activeIsolations.delete(target.id);
-    }, 0);
+    console.log(`🚨 Anti-raid: ${target.user.tag} ${isolated ? 'aislado 2h' : 'no aislado'} - ${result.mensajes} mensajes en ${result.canales} canales`);
+    activeIsolations.delete(target.id);
   } catch (error) {
     console.error('Error en anti-raid:', error);
     activeIsolations.delete(target.id);
@@ -359,6 +359,7 @@ async function handleAntiRaid(message) {
 }
 
 // Borra los mensajes del usuario de la última hora en todos los canales
+// Devuelve { mensajes, canales }
 async function purgeRecentMessages(target, guild) {
   const limit = Date.now() - ANTIRAID_DELETE_MS;
 
@@ -370,6 +371,9 @@ async function purgeRecentMessages(target, guild) {
     channels = guild.channels.cache;
   }
   const textChannels = channels.filter((c) => c.isTextBased());
+
+  let totalDeleted = 0;
+  let totalChannels = 0;
 
   for (const channel of textChannels.values()) {
     try {
@@ -396,11 +400,15 @@ async function purgeRecentMessages(target, guild) {
             }
           }
         }
+        totalDeleted += targets.size;
+        totalChannels += 1;
       }
     } catch {
       // Sin permisos en ese canal, se ignora
     }
   }
+
+  return { mensajes: totalDeleted, canales: totalChannels };
 }
 
 // Función para resolver rol por mención o ID
