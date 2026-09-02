@@ -126,8 +126,13 @@ client.on('messageCreate', async (message) => {
     '1543930439054393475', // Auxiliar
   ];
 
-  // Verificar que el miembro tenga uno de los roles de staff autorizados
   const member = message.member;
+
+  // Verificar que el miembro tenga uno de los roles de staff autorizados
+  const memberRoles = member?.roles;
+  const hasStaffRole = memberRoles
+    ? memberRoles.cache.some((role) => STAFF_ROLES.includes(role.id))
+    : false;
 
   // Borrar el mensaje del comando al instante
   try {
@@ -147,8 +152,6 @@ client.on('messageCreate', async (message) => {
       return null;
     }
   }
-
-  const hasStaffRole = member.roles.cache.some((role) => STAFF_ROLES.includes(role.id));
 
   if (!hasStaffRole) {
     return sendAndDelete('❌ No tienes permisos.');
@@ -232,7 +235,7 @@ client.on('messageCreate', async (message) => {
       console.error(error);
       const msg = error.code === 50013
         ? '❌ El bot no tiene permisos para asignar ese rol. Asegúrate de que el rol del bot esté por encima del rol que intentas asignar en la jerarquía de Discord.'
-        : `❌ Ocurrió un error al asignar el rol. (${error.message || error})`;
+        : `❌ Ocurrió un error al asignar el rol. (${error.name}: ${error.message})`;
       sendAndDelete(msg);
     }
   }
