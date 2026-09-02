@@ -39,6 +39,8 @@ const CHANNELS = {
 const ANTIRAID_CHANNEL = '1543930758434127975';
 const ANTIRAID_TIMEOUT = 2 * 60 * 60 * 1000; // 2 horas de aislamiento
 const ANTIRAID_DELETE_MS = 60 * 60 * 1000; // borrar mensajes de la última hora
+// Canal de logs de antiraid (aislamientos)
+const ANTIRAID_LOG_CHANNEL = '1544553248026009620';
 
 client.once('ready', () => {
   console.log(`✅ Bot conectado como ${client.user.tag}`);
@@ -259,7 +261,7 @@ async function handleAntiRaid(message) {
       }
     }
 
-    // 3. Aviso de aislamiento en el canal antiraid
+    // 3. Aviso de aislamiento en el canal de logs antiraid
     const embed = new EmbedBuilder()
       .setTitle('🚨 Anti-raid activado')
       .setColor(0xed4245)
@@ -268,8 +270,8 @@ async function handleAntiRaid(message) {
       )
       .setTimestamp();
 
-    const channel = message.guild.channels.cache.get(ANTIRAID_CHANNEL);
-    if (channel) channel.send({ embeds: [embed] }).catch(() => {});
+    const logChannel = message.guild.channels.cache.get(ANTIRAID_LOG_CHANNEL);
+    if (logChannel) logChannel.send({ embeds: [embed] }).catch(() => {});
 
     console.log(`🚨 Anti-raid: ${target.user.tag} aislado 2h por mensaje en canal antiraid`);
   } catch (error) {
