@@ -64,14 +64,9 @@ async function sendDontTypeWarning(client) {
     .setTitle('⚠️  NO ESCRIBAS EN ESTE CANAL  ⚠️')
     .setColor(0xed4245)
     .setDescription(
-      `- Si escribes en este canal, **serás AISLADO durante 2 HORAS** y se te **borrarán los últimos mensajes.**`
+      `- Si escribes en este canal, **serás AISLADO durante 2 HORAS** y se te **borrarán los últimos mensajes.**\n\n` +
+        `Este canal está reservado para cuentas AntiSpam. Si has sido hackeado, contacta con el staff.`
     )
-    .addFields({
-      name: '⚠️  NO ESCRIBAS EN ESTE CANAL  ⚠️',
-      value:
-        'Este canal está reservado para cuentas AntiSpam. Si has sido hackeado, contacta con el staff.',
-      inline: false,
-    })
     .setFooter({ text: 'Canal de control Anti Spam' })
     .setTimestamp();
 
