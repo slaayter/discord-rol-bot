@@ -361,11 +361,19 @@ async function handleAntiRaid(message) {
 // Borra los mensajes del usuario de la última hora en todos los canales
 async function purgeRecentMessages(target, guild) {
   const limit = Date.now() - ANTIRAID_DELETE_MS;
-  const channels = guild.channels.cache.filter((c) => c.isTextBased());
 
-  for (const channel of channels.values()) {
+  // Cargar todos los canales (no solo los que están en caché)
+  let channels;
+  try {
+    channels = await guild.channels.fetch();
+  } catch {
+    channels = guild.channels.cache;
+  }
+  const textChannels = channels.filter((c) => c.isTextBased());
+
+  for (const channel of textChannels.values()) {
     try {
-      const messages = await channel.messages.fetch({ limit: 100 });
+      const messages = await channel.messages.fetch({ limit: 200 });
       const targets = messages.filter(
         (m) => !m.author.bot && m.author.id === target.id && m.createdTimestamp >= limit
       );
