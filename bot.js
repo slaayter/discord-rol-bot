@@ -1,4 +1,4 @@
-require('dotenv').config();
+﻿require('dotenv').config();
 
 const { Client, GatewayIntentBits, Options, EmbedBuilder } = require('discord.js');
 
@@ -35,54 +35,14 @@ const CHANNELS = {
   remrol: '1544532940711526530', // canal de remrol
 };
 
-// Canal antiraid: si alguien manda un mensaje aquí, se activa el aislamiento
-const ANTIRAID_CHANNEL = '1543930758434127975';
-const ANTIRAID_TIMEOUT = 2 * 60 * 60 * 1000; // 2 horas de aislamiento
-const ANTIRAID_DELETE_MS = 60 * 60 * 1000; // borrar mensajes de la última hora
-// Canal de logs de antiraid (aislamientos)
-const ANTIRAID_LOG_CHANNEL = '1544553248026009620';
-
 client.once('ready', () => {
   console.log(`✅ Bot conectado como ${client.user.tag}`);
-  sendDontTypeWarning(client);
 });
-
-// Envía el aviso de advertencia en el canal antiraid (solo si aún no existe)
-async function sendDontTypeWarning(client) {
-  const channel = client.channels.cache.get(ANTIRAID_CHANNEL);
-  if (!channel) return;
-
-  try {
-    const existing = await channel.messages.fetch({ limit: 5 });
-    const already = existing.some((m) => m.author.id === client.user.id && m.embeds[0]?.title?.includes('NO ESCRIBAS EN ESTE CANAL'));
-    if (already) return;
-  } catch {
-    // si no puede leer el historial, se ignora
-  }
-
-  const embed = new EmbedBuilder()
-    .setTitle('⚠️  NO ESCRIBAS EN ESTE CANAL  ⚠️')
-    .setColor(0xed4245)
-    .setDescription(
-      `- Si escribes en este canal, **serás AISLADO durante 2 HORAS** y se te **borrarán los últimos mensajes.**\n\n` +
-        `Este canal está reservado para cuentas AntiSpam. Si has sido hackeado, contacta con el staff.`
-    )
-    .setFooter({ text: 'Canal de control Anti Spam' })
-    .setTimestamp();
-
-  channel.send({ embeds: [embed] }).catch(() => {});
-}
 
 client.on('messageCreate', async (message) => {
   // Ignorar mensajes de bots, de DM o que no empiecen con el prefijo
   if (message.author.bot) return;
   if (!message.guild) return;
-
-  // ANTIRAID: si alguien manda un mensaje en el canal antiraid, se aísla
-  if (message.channel.id === ANTIRAID_CHANNEL) {
-    await handleAntiRaid(message);
-    return;
-  }
 
   if (!message.content.startsWith(PREFIX)) return;
 
@@ -302,116 +262,6 @@ client.on('messageCreate', async (message) => {
     }
   }
 });
-
-// Función antiraid: aísla al usuario por 2h y borra sus mensajes de la última hora
-const activeIsolations = new Map(); // userId -> timestamp (evita logs duplicados)
-
-async function handleAntiRaid(message) {
-  const target = message.member;
-  if (!target) return;
-
-  const last = activeIsolations.get(target.id);
-  if (last && Date.now() - last < 60 * 1000) return; // ya se procesó hace poco
-  activeIsolations.set(target.id, Date.now());
-
-  try {
-    // 1. Borrar el mensaje disparador al instante
-    message.delete().catch(() => {});
-
-    // 2. Aislar (silencio) por 2 horas (si no se puede, igual se registra la log)
-    let isolated = true;
-    try {
-      await target.timeout(ANTIRAID_TIMEOUT, 'Cuenta comprometida / anti-raid');
-    } catch {
-      isolated = false;
-    }
-
-    // 3. Borrar los mensajes del usuario de la última hora en todos los canales
-    const result = await purgeRecentMessages(target, message.guild);
-
-    // 4. Log de aislamiento en el canal de logs antiraid con los datos del purge
-    const embed = new EmbedBuilder()
-      .setTitle('Usuario aislado (Don\'t Type)')
-      .setColor(0xed4245)
-      .setDescription(
-        `${target} ha sido ${isolated ? 'aislado 2 hora(s)' : 'marcado'} por escribir en el canal ${message.channel}.\n\n` +
-          `Motivo: Posible cuenta de spam.`
-      )
-      .addFields(
-        { name: 'Usuario', value: `${target} (${target.id})`, inline: false },
-        { name: 'Canal', value: `${message.channel}`, inline: false },
-        { name: 'Mensaje', value: (message.content || '(sin texto)').slice(0, 1000), inline: false },
-        { name: 'Mensajes Borrados', value: `${result.mensajes}`, inline: true },
-        { name: 'Canales', value: `${result.canales}`, inline: true },
-        { name: 'Tiempo', value: '2 hora(s)', inline: true }
-      )
-      .setTimestamp();
-
-    const logChannel = message.guild.channels.cache.get(ANTIRAID_LOG_CHANNEL);
-    if (logChannel) logChannel.send({ embeds: [embed] }).catch(() => {});
-
-    console.log(`🚨 Anti-raid: ${target.user.tag} ${isolated ? 'aislado 2h' : 'no aislado'} - ${result.mensajes} mensajes en ${result.canales} canales`);
-    activeIsolations.delete(target.id);
-  } catch (error) {
-    console.error('Error en anti-raid:', error);
-    activeIsolations.delete(target.id);
-  }
-}
-
-// Borra los mensajes del usuario de la última hora en todos los canales
-// Devuelve { mensajes, canales }
-async function purgeRecentMessages(target, guild) {
-  const limit = Date.now() - ANTIRAID_DELETE_MS;
-
-  // Cargar todos los canales (no solo los que están en caché)
-  let channels;
-  try {
-    channels = await guild.channels.fetch();
-  } catch {
-    channels = guild.channels.cache;
-  }
-  const textChannels = channels.filter((c) => c.isTextBased());
-
-  let totalDeleted = 0;
-  let totalChannels = 0;
-
-  for (const channel of textChannels.values()) {
-    try {
-      let messages;
-      try {
-        messages = await channel.messages.fetch({ limit: 100 });
-      } catch (e) {
-        console.log(`[purge] NO SE PUDO LEER ${channel.id} (${channel.name}): ${e.message}`);
-        continue;
-      }
-      const targets = messages.filter(
-        (m) => !m.author.bot && m.author.id === target.id && m.createdTimestamp >= limit
-      );
-      if (targets.size > 0) {
-        const ids = [...targets.keys()];
-        try {
-          await channel.bulkDelete(ids, true);
-        } catch (e) {
-          console.log(`[purge] ${channel.id} bulk fallo: ${e.message}`);
-          // Si bulkDelete falla (mensajes >14 días u otro motivo), borrar uno a uno
-          for (const m of targets.values()) {
-            try {
-              await m.delete();
-            } catch (e2) {
-              console.log(`[purge] ${channel.id} delete unitario fallo: ${e2.message}`);
-            }
-          }
-        }
-        totalDeleted += targets.size;
-        totalChannels += 1;
-      }
-    } catch {
-      // Sin permisos en ese canal, se ignora
-    }
-  }
-
-  return { mensajes: totalDeleted, canales: totalChannels };
-}
 
 // Función para resolver rol por mención o ID
 async function resolveRole(message, str) {
