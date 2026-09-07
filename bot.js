@@ -84,6 +84,54 @@ client.on('messageCreate', async (message) => {
     '1543930434994438206', // Resp
     '1543930438211604630', // ADM
     '1543930439054393475', // Auxiliar
+    // Roles nuevos de staff
+    '1543930403016941578', // Autorizar Item
+    '1543930424173002874', // Resp. Tickets
+    '1543930439830347916', // Pleno
+    '1543930440635908186', // Junior
+    '1543930441474637834', // Aprendiz
+    '1543930443257086032', // Staff Destaque
+    '1545431567134892102', // Equipo Direccion
+    '1543930444125306880', // ADM AFL
+    '1543930445111238666', // Equipo AFL
+    '1543930446033715210', // ADM AT_Bravo
+    '1543930446985953402', // Equipo AT_Bravo
+    '1543930447887859803', // ADM AT_Alpha
+    '1543930448743370833', // Equipo AT_Alpha
+    '1543930449850802187', // ADM LM_Bravo
+    '1543930450865553529', // Equipo LM_Bravo
+    '1543930451888971806', // ADM LM_Alpha
+    '1543930452966899772', // Equipo LM_Alpha
+    '1543930453638123531', // ADM WS_Bravo
+    '1543930454720122960', // Equipo WS_Bravo
+    '1543930455747727440', // ADM WS_Alpha
+    '1543930456519479377', // Equipo WS_Alpha
+    '1543930457618387006', // ADM WS_Omega
+    '1543930458621087864', // Equipo WS_Omega
+    '1543930459384320000', // ADM WS_Delta
+    '1543930460399472701', // Equipo WS_Delta
+    '1543930461435330580', // ADM ORGs
+    '1543930462379188224', // Equipo ORGs
+    '1543930463213850725', // ADM Legal
+    '1543930464191123487', // Equipo Legal
+    '1543930465118060544', // ADM Discord
+    '1543930466292211803', // Equipo Discord
+    '1543930467357560872', // ADM Rec
+    '1543930468276113449', // Equipo Rec
+    '1543930469526016061', // ADM Tickets
+    '1543930470662934578', // Equipo Tickets
+    '1543930472013504612', // ADM Entretenimiento
+    '1543930472940175390', // Equipo Entretenimiento
+    '1543930474223902790', // ADM Eventos
+    '1543930475637379092', // Equipo Eventos
+    '1543930477067501598', // ADM RS
+    '1543930479240020028', // Equipo RS
+    '1543930483140984833', // ADM TL
+    '1543930483807617086', // Equipo TL
+    '1543930485162639400', // ADM Help
+    '1543930486324465774', // Staff Help
+    '1543930492963786782', // Staff Verificado
+    '1543930493752447047', // Staff
   ];
 
   const member = message.member;
